@@ -332,16 +332,16 @@ def main():
     dates = calculate_post_dates(TARGET_YEAR, TARGET_MONTH, POST_COUNT)
     dlog(f"Tarihler: {[d.strftime('%d.%m') for d in dates]}")
     
-    dlog(f"OPENAI_API_KEY var mı: {bool(os.environ.get("OPENAI_API_KEY"))}")
-    dlog(f"OPENAI_API_KEY uzunluk: {len(os.environ.get("OPENAI_API_KEY",""))}")
-    dlog(f"MAKE_WEBHOOK: {os.environ.get("MAKE_WEBHOOK_URL","")[:50]}...")
+    dlog(f"OPENAI_API_KEY var mı: {bool(os.environ.get('OPENAI_API_KEY'))}")
+    dlog(f"OPENAI_API_KEY uzunluk: {len(os.environ.get('OPENAI_API_KEY', ''))}")
+    dlog(f"MAKE_WEBHOOK: {os.environ.get('MAKE_WEBHOOK_URL', '')[:50]}...")
     dlog("\n>>> generate_content() çağrılıyor...")
     posts = generate_content()
     dlog(f"<<< generate_content() döndü: type={type(posts).__name__}, içerik (ilk 500ch): {str(posts)[:500]}")
     if len(posts) < len(dates):
         print(f"UYARI: GPT-4 sadece {len(posts)} post üretti, {len(dates)} tarih var.")
     
-    dlog(f"\n>>> Döngüye giriliyor: {len(dates)} tarih, {len(posts) if hasattr(posts, "__len__") else "?"} post")
+    dlog(f"\n>>> Döngüye giriliyor: {len(dates)} tarih, {len(posts) if hasattr(posts, '__len__') else '?'} post")
     for i, (post_date, post_data) in enumerate(zip(dates, posts)):
         baslik = post_data["baslik"]
         aciklama = post_data["aciklama"]
