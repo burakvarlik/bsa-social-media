@@ -46,12 +46,20 @@ def calculate_post_dates(year, month, count):
     return dates
 
 
-BRAND_BRIEF = """BSA (Beşiktaş Senaryo Ajansı) — Türkiye'nin önde gelen senaryo ajansı.
-Marka tonu: A24, Criterion, The Gentlewoman, Notos dergi seviyesi. Edebi, mesafeli, evocative.
-Asla pazarlama klişesi yok. Başlıklar bir film ismi gibi: kısa, edebi.
+BRAND_BRIEF = """BSA (Beşiktaş Senaryo Ajansı) — Türkiye'nin profesyonel senaryo ajansı.
 
-Hizmetler: Senaryo Tescili, Senaryo Doktorluğu, Senaryo Havuzu (8 platform: Netflix, Amazon, Disney+, HBO Max, Tabii, Gain, TOD, Exxen), Film Proje Dosyası, Atölyeler.
-İndirim kodu: BSA2026 (Haziran'da tüm hizmetlere). URL: www.senaryoajansi.com. Instagram: @besiktasenaryoajansi"""
+ASIL MİSYON: Yapımcılar ve senaristleri buluşturan platform. Bir senaristin yapımcıya ulaşmasının, bir yapımcının doğru hikâyeyi bulmasının en güvenli yolu.
+
+ANA HİZMET: **Senaryo Havuzu** — 8 büyük platforma (Netflix, Amazon, Disney+, HBO Max, Tabii, Gain, TOD, Exxen) tescilli projeler gönderir. İçeriklerin %40'ı bu hizmete odaklanmalı.
+DESTEK HİZMETLER: Tescil, Doktorluk, Proje Dosyası, Atölyeler.
+
+MARKA SESI:
+- **Samimi** ve **içten** — bir arkadaş, bir partner gibi konuşur. Mesafeli editorial DEĞİL.
+- "Sizi anlıyoruz" duygusu hâkim. Senaristin yalnızlığını, yapımcının arayışını bilir.
+- Edebi ama erişilebilir. Asla pazarlama klişesi ("harika fırsat", "kaçırma!", "şimdi başla!") yok.
+- Başlıklar kısa ama davetkâr. Bir kapıyı açar gibi. ÖRNEK: "Yalnız değilsin.", "Buluşma noktası.", "Bekleyen hikâyen var.", "Bir araya gelelim."
+
+URL: www.senaryoajansi.com. Instagram: @besiktasenaryoajansi."""
 
 
 def generate_content(count):
@@ -60,27 +68,40 @@ def generate_content(count):
 
 Tam olarak {count} adet sosyal medya postu hazırla. ZORUNLU: {count} adet, ne eksik ne fazla.
 
-Her postta 5 alan olmalı:
-1. baslik — Bir film ismi gibi, 1-3 kelime, sonunda nokta veya soru işareti. ÖRNEK: "Tescil.", "Sekiz kapı.", "Şimdi ne?", "Sıradaki sahne.", "Yarı yıl."
-2. aciklama — 1-2 italik cümle, başlığı tamamlar. Liste değil, edebi.
-3. caption — Instagram caption (80-150 kelime). Sade, edebi, satıcı değil. 3-5 hashtag.
-4. platform — "Instagram" veya "LinkedIn" (LinkedIn'i yapımcı içerikleri için kullan, ~%30)
-5. fotograf_prompt — DALL-E 3 İngilizce prompt. SİYAH BEYAZ + SİNEMATİK + 35mm grain. Konuyla uyumlu nesne seç (typewriter, screenplay, projector, theater seats, film camera, fountain pen, manuscript).
+İÇERİK DAĞILIMI:
+- %40 → **Senaryo Havuzu** odaklı (yapımcı-senarist buluşturma, 8 platform)
+- %20 → Diğer hizmetler (Tescil, Doktorluk, Proje Dosyası — sırayla)
+- %20 → Senarist yolculuğu / motivasyon (samimi, "yanındayız" tonu)
+- %10 → Yapımcı tarafı (LinkedIn'e uygun, içerik arayışı)
+- %10 → Atölye / yarışma / kültür
 
-İçerik dağılımı:
-- ~50% hizmet tanıtımı (Tescil, Doktorluk, Havuz, Proje Dosyası — değişerek)
-- ~25% sektör/yapımcı (LinkedIn için)
-- ~15% atölye/yarışma
-- ~10% genel marka (ay başı/sonu, kültür)
+Her postta 5 alan:
+
+1. **baslik** — Kısa (1-3 kelime), samimi, davetkâr. Bir kapıyı açar gibi.
+   ÖRNEK İYİ: "Buluşma noktası.", "Yalnız değilsin.", "Bekleyen hikâyen var.", "Bir araya gelelim.", "Senin sıran."
+   YANLIŞ: "Tescil.", "Doktorluk." (çok mesafeli, çok eski editorial)
+
+2. **aciklama** — 1-2 cümle, samimi italik. Senaristin/yapımcının kalbine konuşur.
+   ÖRNEK İYİ: "Senaryon hazır, ama onu kime gösterirsin? Doğru kapıyı birlikte bulalım."
+   YANLIŞ: "Profesyonel hizmet, hızlı süreç." (klişe)
+
+3. **caption** — Instagram caption, 80-150 kelime. Samimi, içten. "Sizi anlıyoruz" tonu. 3-5 hashtag.
+
+4. **platform** — "Instagram" veya "LinkedIn" (LinkedIn ~%20-30, yapımcı odaklı içerik için)
+
+5. **fotograf_prompt** — gpt-image-1 İngilizce prompt. ZORUNLU kurallara uy:
+   - **PHOTOREALISTIC** documentary-style photography (NOT illustration, NOT abstract)
+   - **Bir İNSAN olmalı** — çeşitlilik: kadın senarist, erkek yapımcı, iki kişi bir masada konuşuyor
+   - Black and white VEYA warm sepia
+   - 35mm film grain, natural soft window light, intimate atmosphere
+   - Konu seçenekleri: woman writing screenplay at desk with laptop, two people discussing a script over coffee, hands typing on vintage typewriter, person reading manuscript pages, screenwriter at cafe with notebook, producer and writer meeting in office
+   - Yazı/metin görülebilir (manuscript pages, laptop screen)
+   - ÖRNEK İYİ: "Documentary-style photograph in warm sepia tones, a woman in her 30s writing at a wooden desk with a vintage typewriter, soft window light from left side, manuscript pages and coffee cup scattered on desk, focused thoughtful expression, 35mm grain, intimate quiet atmosphere, photorealistic"
 
 ÇIKTI FORMATI — GEÇERLI JSON OBJECT:
-{{"posts": [...]}}
-
-Yani DIŞ KATMAN obje, içinde "posts" anahtarı, değer olarak {count} elemanlı array.
-ÖRNEK:
 {{"posts": [
-  {{"baslik": "Tescil.", "aciklama": "...", "caption": "...", "platform": "Instagram", "fotograf_prompt": "Black and white cinematic..."}},
-  ...
+  {{"baslik": "...", "aciklama": "...", "caption": "...", "platform": "Instagram", "fotograf_prompt": "..."}},
+  ... ({count} adet)
 ]}}
 """
     print(f">>> GPT-4 çağrılıyor (hedef {count} post)...", flush=True)
