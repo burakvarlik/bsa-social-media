@@ -140,15 +140,18 @@ def generate_content():
         response_format={"type": "json_object"},
     )
     raw = resp.choices[0].message.content.strip()
-    # Eğer wrapped: {"posts":[...]} formatında geldiyse içeriği çek
+    print(f"    GPT-4 yanıt: {raw[:200]}...", flush=True)
     parsed = json.loads(raw)
     if isinstance(parsed, dict):
-        # İlk array değerini bul
         for v in parsed.values():
             if isinstance(v, list):
                 parsed = v
                 break
-    print(f"    ✓ {len(parsed)} post üretildi")
+        else:
+            # Tek post objesi gelmişse listeye sar
+            if "baslik" in parsed:
+                parsed = [parsed]
+    print(f"    ✓ {len(parsed)} post üretildi", flush=True)
     return parsed
 
 
@@ -161,7 +164,7 @@ def generate_photo(prompt, idx):
         model="dall-e-3",
         prompt=prompt,
         size="1024x1024",
-        quality="hd",
+        quality="standard",
         style="natural",
         n=1,
     )
@@ -366,4 +369,16 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import traceback
+    try:
+        main()
+    except Exception as e:
+        print("=" * 60, flush=True)
+        print(f"FATAL ERROR: {type(e).__name__}: {e}", flush=True)
+        print("=" * 60, flush=True)
+        traceback.print_exc()
+        # debug.txt'i her durumda yaz
+        with open("debug.txt", "w") as f:
+            f.write(f"FATAL: {type(e).__name__}: {e}\n\n")
+            f.write(traceback.format_exc())
+        sys.exit(1)
