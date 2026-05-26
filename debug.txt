@@ -6,78 +6,33 @@ MAKE_WEBHOOK: https://hook.eu2.make.com/bpfs7gs3o3cic9v2rutbu2b26272tq68
 ============================================================
 Tarihler: ['02.07', '04.07', '07.07']
 >>> GPT-4 çağrılıyor (hedef 3 post)...
->>> GPT-4 yanıt uzunluğu: 1817 ch
+>>> GPT-4 yanıt uzunluğu: 2124 ch
 >>> 3 post döndü
 
 >>> 3 post ile 3 tarih için döngü başlıyor
 
-─── Post 1/3 — 02 Jul ─── Yarı Yıl.
-  [DALL-E 1] foto üretiliyor...
-  ✗ HATA: BadRequestError: Error code: 400 - {'error': {'message': "The model 'dall-e-3' does not exist.", 'type': 'image_generation_user_error', 'param': 'model', 'code': 'invalid_value'}}
-Traceback (most recent call last):
-  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 283, in main
-    photo = generate_photo(photo_prompt, i)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 122, in generate_photo
-    resp = client.images.generate(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_utils/_utils.py", line 298, in wrapper
-    return func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/resources/images.py", line 997, in generate
-    return self._post(
-           ^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1332, in post
-    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
-                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1105, in request
-    raise self._make_status_error_from_response(err.response) from None
-openai.BadRequestError: Error code: 400 - {'error': {'message': "The model 'dall-e-3' does not exist.", 'type': 'image_generation_user_error', 'param': 'model', 'code': 'invalid_value'}}
-─── Post 2/3 — 04 Jul ─── Sekiz Kapı.
-  [DALL-E 2] foto üretiliyor...
-  ✗ HATA: BadRequestError: Error code: 400 - {'error': {'message': "The model 'dall-e-3' does not exist.", 'type': 'image_generation_user_error', 'param': 'model', 'code': 'invalid_value'}}
-Traceback (most recent call last):
-  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 283, in main
-    photo = generate_photo(photo_prompt, i)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 122, in generate_photo
-    resp = client.images.generate(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_utils/_utils.py", line 298, in wrapper
-    return func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/resources/images.py", line 997, in generate
-    return self._post(
-           ^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1332, in post
-    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
-                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1105, in request
-    raise self._make_status_error_from_response(err.response) from None
-openai.BadRequestError: Error code: 400 - {'error': {'message': "The model 'dall-e-3' does not exist.", 'type': 'image_generation_user_error', 'param': 'model', 'code': 'invalid_value'}}
-─── Post 3/3 — 07 Jul ─── Proje Dosyası.
-  [DALL-E 3] foto üretiliyor...
-  ✗ HATA: BadRequestError: Error code: 400 - {'error': {'message': "The model 'dall-e-3' does not exist.", 'type': 'image_generation_user_error', 'param': 'model', 'code': 'invalid_value'}}
-Traceback (most recent call last):
-  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 283, in main
-    photo = generate_photo(photo_prompt, i)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 122, in generate_photo
-    resp = client.images.generate(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_utils/_utils.py", line 298, in wrapper
-    return func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/resources/images.py", line 997, in generate
-    return self._post(
-           ^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1332, in post
-    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
-                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1105, in request
-    raise self._make_status_error_from_response(err.response) from None
-openai.BadRequestError: Error code: 400 - {'error': {'message': "The model 'dall-e-3' does not exist.", 'type': 'image_generation_user_error', 'param': 'model', 'code': 'invalid_value'}}
+─── Post 1/3 — 02 Jul ─── Yazarın Kalemi.
+  [gpt-image-1 1] foto üretiliyor...
+  [gpt-image-1 1] tamam (1813 KB)
+  [Template] uygulanıyor...
+  [Template] kaydedildi: 02-tem-persembe-yazarin-kalemi.png
+  [Make] webhook'a gönderiliyor: 2026-07-02
+  [Make] yanıt: 200 {"ok":true,"key":"2026-07-02"}
+─── Post 2/3 — 04 Jul ─── Perde Arkası.
+  [gpt-image-1 2] foto üretiliyor...
+  [gpt-image-1 2] tamam (1935 KB)
+  [Template] uygulanıyor...
+  [Template] kaydedildi: 04-tem-cumartesi-perde-arkasi.png
+  [Make] webhook'a gönderiliyor: 2026-07-04
+  [Make] yanıt: 200 {"ok":true,"key":"2026-07-04"}
+─── Post 3/3 — 07 Jul ─── Gizli Hazineler.
+  [gpt-image-1 3] foto üretiliyor...
+  [gpt-image-1 3] tamam (1981 KB)
+  [Template] uygulanıyor...
+  [Template] kaydedildi: 07-tem-sali-gizli-hazineler.png
+  [Make] webhook'a gönderiliyor: 2026-07-07
+  [Make] yanıt: 200 {"ok":true,"key":"2026-07-07"}
 
 ============================================================
-✓ TAMAMLANDI — 0/3 post üretildi
+✓ TAMAMLANDI — 3/3 post üretildi
 ============================================================
