@@ -51,7 +51,17 @@ jobs:
           POST_COUNT: ${{ github.event.inputs.post_count || '8' }}
         run: python scripts/generate_posts.py
 
+      - name: Debug log'u commit et (her durumda)
+        if: always()
+        run: |
+          git config user.name "BSA Bot"
+          git config user.email "bsa-bot@github.com"
+          [ -f debug.txt ] && git add debug.txt || true
+          git diff --cached --quiet || git commit -m "🐛 Debug log"
+          git push || true
+
       - name: Üretilen postları commit et
+        if: success()
         env:
           MONTH_LABEL: ${{ github.event.inputs.month_label || 'Bir sonraki ay' }}
         run: |
