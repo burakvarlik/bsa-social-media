@@ -79,13 +79,25 @@ def generate_content(count):
 
 Tam olarak {count} adet sosyal medya postu hazırla. ZORUNLU: {count} adet.
 
-YAPI:
-- Postlar {group_count} GRUBA bölünür, her grupta 3 post aynı hizmeti farklı açıdan anlatır.
+YAPI — ÇOK ÖNEMLİ:
+- Postlar {group_count} GRUBA bölünür, her grupta 3 post AYNI hizmeti farklı açıdan anlatır.
 - Tercihen Senaryo Havuzu mutlaka olsun (ana hizmet).
-- Her gruptaki 3 post:
-  (1) sorun/dert/empati ile başlayan post
-  (2) hizmetin bir yönünü tanıtan post
-  (3) call-to-action / davet postu
+- Her gruptaki 3 post farklı POZİSYON ve farklı görsel TİPİ:
+
+  POSITION 1 (sol — INSAN+sahne): Sorun/dert/empati. Hizmeti yaşayan kişi.
+     fotograf_prompt: WIDE SHOT, insan + ortam, color photograph
+  
+  POSITION 2 (orta — OBJE ÖZNESİ, INSAN YOK): Hizmetin somut nesnelerini gösterir.
+     fotograf_prompt: STILL LIFE photography, NO PEOPLE, NO HUMANS, sadece nesneler.
+     - Senaryo Havuzu için: laptop ekranında platform logoları (Netflix, Disney+, Amazon), masa üzerinde senaryo sayfaları
+     - Senaryo Tescili için: mühür, antetli kâğıt, imzalı sözleşme, kırmızı damga, dolma kalem
+     - Senaryo Doktorluğu için: masada açık senaryo sayfaları, kırmızı kalemle düzeltmeler, renkli sticky notes, kahve
+     - Film Proje Dosyası için: açık proje dosyası, storyboard çizimleri, karakter eskizleri, görsel referanslar, masada
+     - Atölyeler için: senaryo defteri, kalemler, ders notları, kitap yığınları
+     ÖRNEK: "Cinematic still life photography, no people, top-down view of a wooden desk with an open screenplay, red editing pen, vintage stamp, manuscript pages, dramatic side lighting, dark moody background, photorealistic"
+  
+  POSITION 3 (sağ — INSAN+çağrı): Call-to-action, davet, "Senin sıran" tonu.
+     fotograf_prompt: WIDE SHOT, insan + ortam, color photograph
 
 Her postta 6 alan:
 
@@ -186,7 +198,7 @@ def prepare_photo_block(photo, w, h):
     return photo.crop((left, top, left + w, top + h))
 
 
-def make_barcode(width=140, height=24):
+def make_barcode(width=140, height=24, color=(0,0,0,255)):
     """Dekoratif barkod görseli."""
     img = Image.new("RGBA", (width, height), (255, 255, 255, 0))
     draw = ImageDraw.Draw(img)
@@ -195,7 +207,7 @@ def make_barcode(width=140, height=24):
     while x < width:
         bar_w = rng.choice([1, 1, 2, 2, 3])
         if rng.random() > 0.3:
-            draw.rectangle([x, 0, x + bar_w, height], fill=(0, 0, 0, 255))
+            draw.rectangle([x, 0, x + bar_w, height], fill=color)
         x += bar_w + rng.choice([1, 1, 2])
     return img
 
@@ -267,15 +279,25 @@ def clean_markdown(s):
 def apply_template(photo, title, subtitle, description, number, output_path, layout="A"):
     """
     Magazine style template uygula.
-    layout A: foto sağda 520×680
-    layout B: foto üstte 760×460
+    layout A: foto sağda 520×700, BEYAZ BG, insan
+    layout B: foto üstte 880×480, BEYAZ BG, insan
+    layout M: foto üstte 880×480, SİYAH BG, obje only
     """
     # Markdown temizleme
     title = clean_markdown(title)
     subtitle = clean_markdown(subtitle)
     description = clean_markdown(description)
     
-    canvas = Image.new("RGB", (1080, 1080), (255, 255, 255))
+    # Layout M = SİYAH BG
+    is_dark = (layout == "M")
+    bg_color = (10, 9, 8) if is_dark else (255, 255, 255)
+    text_color = "#ffffff" if is_dark else "#000000"
+    subtitle_color = "#999999" if is_dark else "#666666"
+    desc_color = "#cccccc" if is_dark else "#444444"
+    logo_color = "white" if is_dark else "black"
+    url_color = (255, 255, 255) if is_dark else (0, 0, 0)
+    
+    canvas = Image.new("RGB", (1080, 1080), bg_color)
     
     title_lines = title_words_layout(title.rstrip(".?!"))
     title_lines = [xml_escape(l) for l in title_lines]
@@ -312,14 +334,14 @@ def apply_template(photo, title, subtitle, description, number, output_path, lay
         
         svg = f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
-{chr(10).join(title_svg_lines)}
-<text x="70" y="{subtitle_y}" font-family="Helvetica, Arial, sans-serif" font-weight="500" font-size="22" fill="#666666" letter-spacing="4">{subtitle_esc}</text>
-{chr(10).join(desc_svg_lines)}
-<text x="430" y="985" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="110" fill="#000000" letter-spacing="-4">{number:02d}</text>
-<line x1="70" y1="985" x2="220" y2="985" stroke="#000000" stroke-width="2"/>
+{chr(10).join(title_svg_lines).replace("fill=\"#000000\"", f"fill=\"{text_color}\"")}
+<text x="70" y="{subtitle_y}" font-family="Helvetica, Arial, sans-serif" font-weight="500" font-size="22" fill="{subtitle_color}" letter-spacing="4">{subtitle_esc}</text>
+{chr(10).join(desc_svg_lines).replace("fill=\"#444444\"", f"fill=\"{desc_color}\"")}
+<text x="430" y="985" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="110" fill="{text_color}" letter-spacing="-4">{number:02d}</text>
+<line x1="70" y1="985" x2="220" y2="985" stroke="{text_color}" stroke-width="2"/>
 </svg>'''
     
-    else:  # Layout B — Foto üstte geniş
+    else:  # Layout B veya M — Foto üstte geniş (B beyaz, M siyah)
         photo_w, photo_h = 880, 480
         photo_x, photo_y = 100, 200
         prepared = prepare_photo_block(photo, photo_w, photo_h)
@@ -345,10 +367,10 @@ def apply_template(photo, title, subtitle, description, number, output_path, lay
         
         svg = f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
-{chr(10).join(title_svg_lines)}
-<text x="70" y="{subtitle_y}" font-family="Helvetica, Arial, sans-serif" font-weight="500" font-size="20" fill="#666666" letter-spacing="4">{subtitle_esc}</text>
-{chr(10).join(desc_svg_lines)}
-<text x="1010" y="1000" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="110" fill="#000000" letter-spacing="-4">{number:02d}</text>
+{chr(10).join(title_svg_lines).replace("fill=\"#000000\"", f"fill=\"{text_color}\"")}
+<text x="70" y="{subtitle_y}" font-family="Helvetica, Arial, sans-serif" font-weight="500" font-size="20" fill="{subtitle_color}" letter-spacing="4">{subtitle_esc}</text>
+{chr(10).join(desc_svg_lines).replace("fill=\"#444444\"", f"fill=\"{desc_color}\"")}
+<text x="1010" y="1000" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="110" fill="{text_color}" letter-spacing="-4">{number:02d}</text>
 </svg>'''
     
     # SVG → overlay
@@ -360,7 +382,7 @@ def apply_template(photo, title, subtitle, description, number, output_path, lay
     result = Image.alpha_composite(canvas_rgba, overlay)
     
     # Logo sol üst (siyah, 180px)
-    logo = make_logo_overlay(180, "black")
+    logo = make_logo_overlay(180, logo_color)
     result.paste(logo, (70, 70), logo)
     
     # Web URL sağ üst — PIL ile çiz (siyah, küçük caps)
@@ -368,13 +390,13 @@ def apply_template(photo, title, subtitle, description, number, output_path, lay
     try:
         font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
         font = ImageFont.truetype(font_path, 18)
-        draw.text((1010, 100), "WWW.SENARYOAJANSI.COM", fill=(0, 0, 0, 255), font=font, anchor="rm")
+        draw.text((1010, 100), "WWW.SENARYOAJANSI.COM", fill=url_color + (255,) if len(url_color)==3 else url_color, font=font, anchor="rm")
     except Exception:
         pass
     
-    # Barkod sol alt — sadece Layout A'da
+    # Barkod sol alt — sadece Layout A'da (beyaz BG)
     if layout == "A":
-        barcode = make_barcode(140, 24)
+        barcode = make_barcode(140, 24, color=(0,0,0,255))
         result.paste(barcode, (70, 990), barcode)
     
     result.convert("RGB").save(output_path, quality=95)
@@ -421,19 +443,37 @@ def main():
             
             print(f"─── Post {i+1}/{len(posts)} — {post_date.strftime('%d %b')} ─── {baslik} [{subtitle}]", flush=True)
             
-            # WIDE SHOT prefix — gpt-image-1'i zorla
-            full_prompt = (
-                "CRITICAL: This must be a WIDE SHOT or LONG SHOT only. "
-                "The person must occupy less than 35% of the frame. "
-                "Show the full environment and context. NO close-ups, NO face shots, NO medium portraits. "
-                "Viewer should see the room/scene around the person. "
-                "Cinema and screenwriting context. "
-                + photo_prompt
-            )
+            # Layout'a göre prefix
+            is_middle = (i % 3 == 1)
+            if is_middle:
+                full_prompt = (
+                    "CRITICAL: STILL LIFE photography. NO PEOPLE, NO HUMANS, NO FACES in the image. "
+                    "Only objects on a surface (desk, table). Dark moody background, dramatic side lighting, cinematic style. "
+                    "Top-down or 3/4 angle view of objects related to screenwriting and cinema. "
+                    "Photorealistic, magazine editorial still life, rich color tones. "
+                    + photo_prompt
+                )
+            else:
+                full_prompt = (
+                    "CRITICAL: This must be a WIDE SHOT or LONG SHOT only. "
+                    "The person must occupy less than 35% of the frame. "
+                    "Show the full environment and context. NO close-ups, NO face shots, NO medium portraits. "
+                    "Viewer should see the room/scene around the person. "
+                    "Cinema and screenwriting context. "
+                    + photo_prompt
+                )
             photo = generate_photo(full_prompt, i)
             
-            # Layout rotation: A, B alternate
-            layout = "A" if i % 2 == 0 else "B"
+            # Layout rotation: 3'lü grup mantığı
+            # i%3==0 → A (sol, insan, beyaz BG)
+            # i%3==1 → M (orta, obje, SİYAH BG)
+            # i%3==2 → B (sağ, insan, beyaz BG)
+            if i % 3 == 1:
+                layout = "M"
+            elif i % 3 == 0:
+                layout = "A"
+            else:
+                layout = "B"
             print(f"  [Template] layout={layout}, numara={i+1}", flush=True)
             apply_template(photo, baslik, subtitle, aciklama, i + 1, out_path, layout=layout)
             
