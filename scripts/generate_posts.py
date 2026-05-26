@@ -313,19 +313,35 @@ def push_to_make(record):
 TR_MONTHS = {1:"oca",2:"sub",3:"mar",4:"nis",5:"may",6:"haz",7:"tem",8:"agu",9:"eyl",10:"eki",11:"kas",12:"ara"}
 TR_DAYS = {0:"pzt",1:"sali",2:"car",3:"persembe",4:"cuma",5:"cumartesi",6:"pazar"}
 
+DEBUG_LOG = []
+
+def dlog(msg):
+    """Hem print et hem debug.txt için sakla."""
+    print(msg, flush=True)
+    DEBUG_LOG.append(msg)
+    # Her log satırında debug.txt'i güncelle (her ihtimale karşı)
+    with open("debug.txt", "w") as f:
+        f.write("\n".join(DEBUG_LOG))
+
 def main():
-    print("=" * 60)
-    print(f"BSA AYLIK POST ÜRETİMİ — {MONTH_LABEL}")
-    print(f"Hedef: {POST_COUNT} post, {TR_MONTHS[TARGET_MONTH]} {TARGET_YEAR}")
-    print("=" * 60)
+    dlog("=" * 60)
+    dlog(f"BSA AYLIK POST ÜRETİMİ — {MONTH_LABEL}")
+    dlog(f"Hedef: {POST_COUNT} post, {TR_MONTHS[TARGET_MONTH]} {TARGET_YEAR}")
+    dlog("=" * 60)
     
     dates = calculate_post_dates(TARGET_YEAR, TARGET_MONTH, POST_COUNT)
-    print(f"Tarihler: {[d.strftime('%d.%m') for d in dates]}\n")
+    dlog(f"Tarihler: {[d.strftime('%d.%m') for d in dates]}")
     
+    dlog(f"OPENAI_API_KEY var mı: {bool(os.environ.get("OPENAI_API_KEY"))}")
+    dlog(f"OPENAI_API_KEY uzunluk: {len(os.environ.get("OPENAI_API_KEY",""))}")
+    dlog(f"MAKE_WEBHOOK: {os.environ.get("MAKE_WEBHOOK_URL","")[:50]}...")
+    dlog("\n>>> generate_content() çağrılıyor...")
     posts = generate_content()
+    dlog(f"<<< generate_content() döndü: type={type(posts).__name__}, içerik (ilk 500ch): {str(posts)[:500]}")
     if len(posts) < len(dates):
         print(f"UYARI: GPT-4 sadece {len(posts)} post üretti, {len(dates)} tarih var.")
     
+    dlog(f"\n>>> Döngüye giriliyor: {len(dates)} tarih, {len(posts) if hasattr(posts, "__len__") else "?"} post")
     for i, (post_date, post_data) in enumerate(zip(dates, posts)):
         baslik = post_data["baslik"]
         aciklama = post_data["aciklama"]
@@ -365,7 +381,7 @@ def main():
     
     print("\n" + "=" * 60)
     print(f"✓ TAMAMLANDI — {MONTH_LABEL}")
-    print("=" * 60)
+    dlog("=" * 60)
 
 
 if __name__ == "__main__":
