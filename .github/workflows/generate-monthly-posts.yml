@@ -49,7 +49,7 @@ jobs:
           TARGET_YEAR: ${{ github.event.inputs.year || '2026' }}
           TARGET_MONTH: ${{ github.event.inputs.month || '7' }}
           POST_COUNT: ${{ github.event.inputs.post_count || '8' }}
-        run: python scripts/generate_posts.py
+        run: python -u scripts/generate_posts.py 2>&1 | tee debug.txt || true
 
       - name: Debug log'u commit et (her durumda)
         if: always()
