@@ -1,0 +1,66 @@
+name: Aylık BSA Postlarını Üret
+
+on:
+  workflow_dispatch:
+    inputs:
+      month_label:
+        description: 'Hedef ay (ör. "Temmuz 2026")'
+        required: true
+        default: 'Temmuz 2026'
+      year:
+        description: 'Yıl'
+        required: true
+        default: '2026'
+      month:
+        description: 'Ay numarası (1-12)'
+        required: true
+        default: '7'
+      post_count:
+        description: 'Post sayısı'
+        required: true
+        default: '8'
+  schedule:
+    # Her ayın 25'inde 06:00 UTC (09:00 Istanbul) — bir sonraki ay için üret
+    - cron: '0 6 25 * *'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Bağımlılıkları yükle
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libcairo2 libpango-1.0-0 libpangoft2-1.0-0
+          pip install --quiet openai pillow cairosvg requests
+
+      - name: Postları üret
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          MAKE_WEBHOOK_URL: https://hook.eu2.make.com/bpfs7gs3o3cic9v2rutbu2b26272tq68
+          MONTH_LABEL: ${{ github.event.inputs.month_label || 'Bir sonraki ay' }}
+          TARGET_YEAR: ${{ github.event.inputs.year || '2026' }}
+          TARGET_MONTH: ${{ github.event.inputs.month || '7' }}
+          POST_COUNT: ${{ github.event.inputs.post_count || '8' }}
+        run: python scripts/generate_posts.py
+
+      - name: Üretilen postları commit et
+        env:
+          MONTH_LABEL: ${{ github.event.inputs.month_label || 'Bir sonraki ay' }}
+        run: |
+          git config user.name "BSA Bot"
+          git config user.email "bsa-bot@github.com"
+          git add posts/
+          if git diff --cached --quiet; then
+            echo "Yeni dosya yok"
+          else
+            git commit -m "🎬 Yeni postlar: $MONTH_LABEL"
+            git push
+          fi
