@@ -1,35 +1,35 @@
 ============================================================
-BSA AYLIK POST ÜRETİMİ — Temmuz 2026
+BSA AYLIK POST ÜRETİMİ — Temmuz 2026 v3
 Hedef: 3 post, tem 2026
 OPENAI_API_KEY: var (164 ch)
 MAKE_WEBHOOK: https://hook.eu2.make.com/bpfs7gs3o3cic9v2rutbu2b26272tq68
 ============================================================
 Tarihler: ['02.07', '04.07', '07.07']
 >>> GPT-4 çağrılıyor (hedef 3 post)...
->>> GPT-4 yanıt uzunluğu: 2124 ch
+>>> GPT-4 yanıt uzunluğu: 2443 ch
 >>> 3 post döndü
 
 >>> 3 post ile 3 tarih için döngü başlıyor
 
-─── Post 1/3 — 02 Jul ─── Yazarın Kalemi.
+─── Post 1/3 — 02 Jul ─── Bekleyen Hikâyen Var.
   [gpt-image-1 1] foto üretiliyor...
-  [gpt-image-1 1] tamam (1813 KB)
+  [gpt-image-1 1] tamam (1826 KB)
   [Template] uygulanıyor...
-  [Template] kaydedildi: 02-tem-persembe-yazarin-kalemi.png
+  [Template] kaydedildi: 02-tem-persembe-bekleyen-hik-yen-var.png
   [Make] webhook'a gönderiliyor: 2026-07-02
   [Make] yanıt: 200 {"ok":true,"key":"2026-07-02"}
-─── Post 2/3 — 04 Jul ─── Perde Arkası.
+─── Post 2/3 — 04 Jul ─── Yalnız Değilsin.
   [gpt-image-1 2] foto üretiliyor...
-  [gpt-image-1 2] tamam (1935 KB)
+  [gpt-image-1 2] tamam (1662 KB)
   [Template] uygulanıyor...
-  [Template] kaydedildi: 04-tem-cumartesi-perde-arkasi.png
+  [Template] kaydedildi: 04-tem-cumartesi-yalniz-degilsin.png
   [Make] webhook'a gönderiliyor: 2026-07-04
   [Make] yanıt: 200 {"ok":true,"key":"2026-07-04"}
-─── Post 3/3 — 07 Jul ─── Gizli Hazineler.
+─── Post 3/3 — 07 Jul ─── Bir Araya Gelelim.
   [gpt-image-1 3] foto üretiliyor...
-  [gpt-image-1 3] tamam (1981 KB)
+  [gpt-image-1 3] tamam (2000 KB)
   [Template] uygulanıyor...
-  [Template] kaydedildi: 07-tem-sali-gizli-hazineler.png
+  [Template] kaydedildi: 07-tem-sali-bir-araya-gelelim.png
   [Make] webhook'a gönderiliyor: 2026-07-07
   [Make] yanıt: 200 {"ok":true,"key":"2026-07-07"}
 
