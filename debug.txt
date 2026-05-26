@@ -1,0 +1,4 @@
+  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 335
+    dlog(f"OPENAI_API_KEY var mı: {bool(os.environ.get("OPENAI_API_KEY"))}")
+                                                        ^^^^^^^^^^^^^^
+SyntaxError: f-string: unmatched '('
