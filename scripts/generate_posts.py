@@ -121,7 +121,7 @@ def generate_photo(prompt, idx):
     print(f"  [DALL-E {idx+1}] foto üretiliyor...", flush=True)
     resp = client.images.generate(
         model="dall-e-3", prompt=prompt, size="1024x1024",
-        quality="standard", style="natural", n=1,
+        quality="standard", n=1,
     )
     url = resp.data[0].url
     img_bytes = requests.get(url, timeout=60).content
