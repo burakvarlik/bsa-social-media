@@ -332,11 +332,13 @@ def apply_template(photo, title, subtitle, description, number, output_path, lay
                 f'<text x="70" y="{desc_y_start + i*32}" font-family="Georgia, serif" font-style="italic" font-size="22" fill="#444444">{l}</text>'
             )
         
+        title_block = chr(10).join(title_svg_lines).replace('fill="#000000"', f'fill="{text_color}"')
+        desc_block = chr(10).join(desc_svg_lines).replace('fill="#444444"', f'fill="{desc_color}"')
         svg = f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
-{chr(10).join(title_svg_lines).replace("fill=\"#000000\"", f"fill=\"{text_color}\"")}
+{title_block}
 <text x="70" y="{subtitle_y}" font-family="Helvetica, Arial, sans-serif" font-weight="500" font-size="22" fill="{subtitle_color}" letter-spacing="4">{subtitle_esc}</text>
-{chr(10).join(desc_svg_lines).replace("fill=\"#444444\"", f"fill=\"{desc_color}\"")}
+{desc_block}
 <text x="430" y="985" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="110" fill="{text_color}" letter-spacing="-4">{number:02d}</text>
 <line x1="70" y1="985" x2="220" y2="985" stroke="{text_color}" stroke-width="2"/>
 </svg>'''
@@ -365,11 +367,13 @@ def apply_template(photo, title, subtitle, description, number, output_path, lay
                 f'<text x="70" y="{desc_y_start + i*30}" font-family="Georgia, serif" font-style="italic" font-size="20" fill="#444444">{l}</text>'
             )
         
+        title_block = chr(10).join(title_svg_lines).replace('fill="#000000"', f'fill="{text_color}"')
+        desc_block = chr(10).join(desc_svg_lines).replace('fill="#444444"', f'fill="{desc_color}"')
         svg = f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
-{chr(10).join(title_svg_lines).replace("fill=\"#000000\"", f"fill=\"{text_color}\"")}
+{title_block}
 <text x="70" y="{subtitle_y}" font-family="Helvetica, Arial, sans-serif" font-weight="500" font-size="20" fill="{subtitle_color}" letter-spacing="4">{subtitle_esc}</text>
-{chr(10).join(desc_svg_lines).replace("fill=\"#444444\"", f"fill=\"{desc_color}\"")}
+{desc_block}
 <text x="1010" y="1000" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="110" fill="{text_color}" letter-spacing="-4">{number:02d}</text>
 </svg>'''
     
@@ -390,7 +394,7 @@ def apply_template(photo, title, subtitle, description, number, output_path, lay
     try:
         font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
         font = ImageFont.truetype(font_path, 18)
-        draw.text((1010, 100), "WWW.SENARYOAJANSI.COM", fill=url_color + (255,) if len(url_color)==3 else url_color, font=font, anchor="rm")
+        draw.text((1010, 100), "WWW.SENARYOAJANSI.COM", fill=url_color, font=font, anchor="rm")
     except Exception:
         pass
     
