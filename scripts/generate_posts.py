@@ -250,12 +250,31 @@ def fit_title_font(lines, max_width=620, base_size=78):
     return base_size
 
 
+def clean_markdown(s):
+    """GPT-4'ün ürettiği markdown markerlarını temizle."""
+    import re
+    # **bold** veya __bold__
+    s = re.sub(r"\*\*(.+?)\*\*", r"\1", s)
+    s = re.sub(r"__(.+?)__", r"\1", s)
+    # *italic* veya _italic_
+    s = re.sub(r"(?<!\w)\*(.+?)\*(?!\w)", r"\1", s)
+    s = re.sub(r"(?<!\w)_(.+?)_(?!\w)", r"\1", s)
+    # Tek başına kalan _ veya *
+    s = s.replace("_", "").replace("**", "").replace("*", "")
+    return s.strip()
+
+
 def apply_template(photo, title, subtitle, description, number, output_path, layout="A"):
     """
     Magazine style template uygula.
     layout A: foto sağda 520×680
     layout B: foto üstte 760×460
     """
+    # Markdown temizleme
+    title = clean_markdown(title)
+    subtitle = clean_markdown(subtitle)
+    description = clean_markdown(description)
+    
     canvas = Image.new("RGB", (1080, 1080), (255, 255, 255))
     
     title_lines = title_words_layout(title.rstrip(".?!"))
@@ -353,9 +372,10 @@ def apply_template(photo, title, subtitle, description, number, output_path, lay
     except Exception:
         pass
     
-    # Barkod sol alt
-    barcode = make_barcode(140, 24)
-    result.paste(barcode, (70, 990), barcode)
+    # Barkod sol alt — sadece Layout A'da
+    if layout == "A":
+        barcode = make_barcode(140, 24)
+        result.paste(barcode, (70, 990), barcode)
     
     result.convert("RGB").save(output_path, quality=95)
 
@@ -401,7 +421,16 @@ def main():
             
             print(f"─── Post {i+1}/{len(posts)} — {post_date.strftime('%d %b')} ─── {baslik} [{subtitle}]", flush=True)
             
-            photo = generate_photo(photo_prompt, i)
+            # WIDE SHOT prefix — gpt-image-1'i zorla
+            full_prompt = (
+                "CRITICAL: This must be a WIDE SHOT or LONG SHOT only. "
+                "The person must occupy less than 35% of the frame. "
+                "Show the full environment and context. NO close-ups, NO face shots, NO medium portraits. "
+                "Viewer should see the room/scene around the person. "
+                "Cinema and screenwriting context. "
+                + photo_prompt
+            )
+            photo = generate_photo(full_prompt, i)
             
             # Layout rotation: A, B alternate
             layout = "A" if i % 2 == 0 else "B"
