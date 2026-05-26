@@ -18,7 +18,7 @@ on:
       post_count:
         description: 'Post sayısı'
         required: true
-        default: '8'
+        default: '9'
   schedule:
     # Her ayın 25'inde 06:00 UTC (09:00 Istanbul) — bir sonraki ay için üret
     - cron: '0 6 25 * *'
@@ -48,7 +48,7 @@ jobs:
           MONTH_LABEL: ${{ github.event.inputs.month_label || 'Bir sonraki ay' }}
           TARGET_YEAR: ${{ github.event.inputs.year || '2026' }}
           TARGET_MONTH: ${{ github.event.inputs.month || '7' }}
-          POST_COUNT: ${{ github.event.inputs.post_count || '8' }}
+          POST_COUNT: ${{ github.event.inputs.post_count || '9' }}
         run: python -u scripts/generate_posts.py 2>&1 | tee debug.txt || true
 
       - name: Debug log'u commit et (her durumda)
