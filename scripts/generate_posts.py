@@ -1,16 +1,18 @@
 """
-BSA Aylık Post Üreticisi v2
-============================
-Her ay 8 yeni post üretir: GPT-4 (içerik) + DALL-E 3 (foto) + BSA template + GitHub + Make webhook
+BSA Aylık Post Üreticisi v5 — Magazine Style
+============================================
+Beyaz BG, modular layout, foto dikdörtgen bloklarda, CAPS başlık,
+numara, barkod dekorasyonu, siyah logo, web URL.
+Karakterler WIDE SHOT, senaryo/sinema bağlamında.
 """
-import os, sys, json, io, time, re, traceback
+import os, sys, json, io, time, re, traceback, base64
 from datetime import date, timedelta
 from pathlib import Path
 
 import requests
 import numpy as np
 from openai import OpenAI
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import cairosvg
 
 # ── Config ──
@@ -19,7 +21,7 @@ MAKE_WEBHOOK = os.environ["MAKE_WEBHOOK_URL"]
 MONTH_LABEL = os.environ.get("MONTH_LABEL", "Bir sonraki ay")
 TARGET_YEAR = int(os.environ.get("TARGET_YEAR", "2026"))
 TARGET_MONTH = int(os.environ.get("TARGET_MONTH", "7"))
-POST_COUNT = int(os.environ.get("POST_COUNT", "8"))
+POST_COUNT = int(os.environ.get("POST_COUNT", "9"))
 
 REPO_OWNER = "burakvarlik"
 REPO_NAME = "bsa-social-media"
@@ -34,10 +36,9 @@ TR_DAYS = {0:"pzt",1:"sali",2:"car",3:"persembe",4:"cuma",5:"cumartesi",6:"pazar
 
 client = OpenAI(api_key=OPENAI_KEY)
 
-# ── Yardımcılar ──
 
+# ── Tarih hesaplama ──
 def calculate_post_dates(year, month, count):
-    """Verilen ay için Sal/Per/Cmt günleri."""
     dates, d = [], date(year, month, 1)
     while d.month == month and len(dates) < count:
         if d.weekday() in (1, 3, 5):
@@ -46,115 +47,100 @@ def calculate_post_dates(year, month, count):
     return dates
 
 
+# ── İçerik üretimi ──
 BRAND_BRIEF = """BSA (Beşiktaş Senaryo Ajansı) — Türkiye'nin profesyonel senaryo ajansı.
+Resmi site: www.senaryoajansi.com
 
-ASIL MİSYON: Yapımcılar ve senaristleri buluşturan platform. Bir senaristin yapımcıya ulaşmasının, bir yapımcının doğru hikâyeyi bulmasının en güvenli yolu.
+ASIL MİSYON: Yapımcılar ve senaristleri buluşturan platform. "Senaryonuzu doğru yapımcıyla buluşturun."
 
-ANA HİZMET: **Senaryo Havuzu** — 8 büyük platforma (Netflix, Amazon, Disney+, HBO Max, Tabii, Gain, TOD, Exxen) tescilli projeler gönderir. İçeriklerin %40'ı bu hizmete odaklanmalı.
-DESTEK HİZMETLER: Tescil, Doktorluk, Proje Dosyası, Atölyeler.
+HİZMETLER VE LİNKLERİ:
+- **Senaryo Havuzu** (www.senaryoajansi.com/senaryohavuzu) — Netflix, Amazon Prime, Disney+, HBO Max, Tabii, Gain, TOD, Exxen platformlarına proje gönderimi. ANA HİZMET.
+- **Senaryo Tescili** (www.senaryoajansi.com/senaryotescil) — Yasal koruma, mesleki sorumluluk sigortası
+- **Senaryo Doktorluğu** (www.senaryoajansi.com/senaryoraporlama) — Profesyonel rapor, yapısal analiz
+- **Film Proje Dosyası** (www.senaryoajansi.com/filmprojedosyasi) — 4 adımlı pitch deck: Özet, Karakter, Görsel, Bütçe
+- **Senaryo Sipariş** (www.senaryoajansi.com/senaryotalep) — Özel sipariş
+- **Atölyeler** (www.senaryoajansi.com/atolyeler) — Eğitim
+
+İNDİRİM: BSA2026 (tüm hizmetler)
+İLETİŞİM: bilgi@senaryoajansi.com · Gayrettepe, Yazarlar Sk. 14/4, İstanbul
+Instagram: @besiktasenaryoajansi · LinkedIn: var
 
 MARKA SESI:
-- **Samimi** ve **içten** — bir arkadaş, bir partner gibi konuşur. Mesafeli editorial DEĞİL.
-- "Sizi anlıyoruz" duygusu hâkim. Senaristin yalnızlığını, yapımcının arayışını bilir.
-- Edebi ama erişilebilir. Asla pazarlama klişesi ("harika fırsat", "kaçırma!", "şimdi başla!") yok.
-- Başlıklar kısa ama davetkâr. Bir kapıyı açar gibi. ÖRNEK: "Yalnız değilsin.", "Buluşma noktası.", "Bekleyen hikâyen var.", "Bir araya gelelim."
-
-URL: www.senaryoajansi.com. Instagram: @besiktasenaryoajansi."""
+- **Samimi** ve **içten** — "Sizi anlıyoruz" tonu. Bir partner gibi konuşur.
+- Senaristin yalnızlığını, yapımcının arayışını bilir.
+- Edebi ama erişilebilir. Pazarlama klişesi yok.
+- Başlıklar kısa ama davetkâr. ÖRNEK: "Yalnız değilsin.", "Buluşma noktası.", "Bekleyen hikâyen var."
+"""
 
 
 def generate_content(count):
-    """N adet post üret. Her zaman tam N adet array döndürür."""
-    # Hizmet grupları sayısı (her grup 3 post)
     group_count = max(1, count // 3)
-    
     prompt = f"""{BRAND_BRIEF}
 
 Tam olarak {count} adet sosyal medya postu hazırla. ZORUNLU: {count} adet.
 
-YAPI — ÖNEMLİ:
+YAPI:
 - Postlar {group_count} GRUBA bölünür, her grupta 3 post aynı hizmeti farklı açıdan anlatır.
-- Her grup için bir hizmet seç:
-   • **Senaryo Havuzu** — yapımcı-senarist buluşturma platformu, 8 büyük platforma (Netflix, Amazon, Disney+, HBO Max, Tabii, Gain, TOD, Exxen) proje gönderimi
-   • **Senaryo Tescili** — fikri koruma, mesleki sorumluluk sigortası
-   • **Senaryo Doktorluğu** — yapısal analiz, karakter çalışması, profesyonel rapor
-   • **Film Proje Dosyası** — yapımcıya sunulacak pitch deck hazırlığı
-   • **Atölyeler** — yazma eğitimleri (Temel Senaryo, Karakter, Dizi Pilotu)
+- Tercihen Senaryo Havuzu mutlaka olsun (ana hizmet).
+- Her gruptaki 3 post:
+  (1) sorun/dert/empati ile başlayan post
+  (2) hizmetin bir yönünü tanıtan post
+  (3) call-to-action / davet postu
 
-- {group_count} grup için {group_count} farklı hizmet seç. Tercihen Senaryo Havuzu mutlaka olsun (ana hizmet).
-- Her gruptaki 3 post farklı açıdan SAME service için: 
-   (1) sorun/dert ile başlayan empati postu
-   (2) hizmetin bir yönünü tanıtan post
-   (3) call-to-action / davet postu
+Her postta 6 alan:
 
-Her postta 5 alan:
+1. **baslik** — Kısa (1-3 kelime), samimi, davetkâr. Sonunda nokta veya soru işareti.
+   ÖRNEK: "Yalnız değilsin.", "Buluşma noktası.", "Bekleyen hikâyen var.", "Senin sıran.", "Bir araya gelelim."
+   ÇOK UZUN OLMASIN — başlık tasarımda CAPS sans-serif gösteriliyor, max 18 karakter olsun.
 
-1. **baslik** — Kısa (1-3 kelime), samimi, davetkâr.
-   ÖRNEK İYİ: "Buluşma noktası.", "Yalnız değilsin.", "Bekleyen hikâyen var.", "Senin sıran.", "Bir araya gelelim."
-   YANLIŞ: "Tescil.", "Doktorluk." (çok kuru)
+2. **subtitle** — Hizmet adı (CAPS gösterilir). DEĞER ÖRNEKLERİ:
+   "SENARYO HAVUZU", "SENARYO TESCİLİ", "SENARYO DOKTORLUĞU", "FİLM PROJE DOSYASI", "ATÖLYELER"
+   Postun ait olduğu hizmet adını bire bir yaz.
 
-2. **aciklama** — 1-2 cümle samimi italik. "Sizi anlıyoruz" tonu.
+3. **aciklama** — 1-2 cümle samimi italik açıklama. "Sizi anlıyoruz" tonu. Max 80 karakter — kısa olsun, tasarımda yerleşecek.
 
-3. **caption** — Instagram caption 80-150 kelime. İçten, satıcı değil. 3-5 hashtag.
+4. **caption** — Instagram caption 80-150 kelime. İçten, satıcı değil. Mutlaka resmi linki ekle. 3-5 hashtag.
 
-4. **platform** — "Instagram" (varsayılan). LinkedIn sadece yapımcı odaklı bazı postlar için.
+5. **platform** — "Instagram" varsayılan. LinkedIn ~%20 yapımcı odaklı içerik için.
 
-5. **fotograf_prompt** — gpt-image-1 İngilizce. ZORUNLU kurallar:
-   - **COLOR photograph** (RENKLİ, siyah-beyaz değil)
-   - **PHOTOREALISTIC**, magazine editorial style (Vogue, Cosmopolitan tarzı)
-   - Kişi/kişiler **MEDIUM SHOT veya WIDE SHOT** (NOT close-up, NOT face close-up) — gövdeden ya da uzaktan
-   - Kişi tipi: **Turkish, Southern European or Mediterranean appearance** (olive skin, dark hair common). Çeşitlilik için: kadın/erkek, genç/orta yaş.
-   - Doğal yumuşak ışık, warm tones, contemporary urban setting (Istanbul cafe, modern apartment, co-working space, sunlit office)
-   - Konu seçenekleri (HEPSİ medium/wide shot):
-     • Kadın senarist Istanbul cafe'sinde laptop'la yazıyor, dışarıdan çekim
-     • İki kişi modern bir ofiste senaryo üzerinde konuşuyor, masaya wide shot
-     • Erkek yapımcı pencere kenarında manuscript okuyor, wide angle
-     • Senarist evde kitaplıkla birlikte yazı masasında, oda görünür
-     • Iki yapımcı bir kafede toplanmış, ortam ile birlikte görünür
-   - YAZI/METIN ekrandan veya kâğıttan biraz görülebilir ama odak insan ve atmosfer
-   - ÖRNEK İYİ: "Color photograph, magazine editorial style, wide shot of a Turkish woman in her early 30s sitting at a sunlit cafe table in Istanbul, writing in a notebook with a laptop nearby, warm natural light, contemporary urban atmosphere, olive skin and dark hair, soft focus background of bookshelves and plants, photorealistic, Vogue editorial aesthetic"
+6. **fotograf_prompt** — gpt-image-1 İngilizce prompt. ZORUNLU kurallar:
+   - **WIDE SHOT** — kişiyi UZAKTAN gör. Mekan/ortam tam görünür. NOT close-up, NOT face shot, NOT portrait.
+   - Kişi: tam gövde veya gövde+orta, oturan/yazan/okuyan, screenwriting/cinema bağlamı
+   - Bağlam: kişi laptop'ta yazıyor, kitaplı ofiste senaryo okuyor, sinema setinde gözlem yapıyor, masada projeyi inceliyor
+   - **COLOR photograph**, photorealistic, magazine editorial (Vogue/Cosmopolitan tarzı)
+   - Doğal ışık, warm tones, contemporary urban (Istanbul cafe, modern apartment, screening room, sunny office)
+   - Kişi tipi: Turkish, Southern European or Mediterranean appearance. Çeşitlilik: kadın/erkek, genç/orta yaş.
+   - **NO close-up faces, NO portrait shots, NO eye-level head shots**
+   - ÖRNEK İYİ: "Wide shot color photograph, magazine editorial style, a Turkish woman seen from across a sunlit cafe in Istanbul, sitting at a wooden table writing on her laptop, environment fully visible with bookshelves and plants, warm golden hour light, full scene composition, photorealistic, Vogue aesthetic"
+   - ÖRNEK İYİ: "Wide shot of a Mediterranean man sitting at a desk in a modern producer's office, reading a script, viewed from across the room, large window with natural light, bookshelf and film posters in background, warm color palette, magazine editorial photography, photorealistic"
 
 ÇIKTI FORMATI — GEÇERLI JSON OBJECT:
 {{"posts": [
-  {{"baslik": "...", "aciklama": "...", "caption": "...", "platform": "Instagram", "fotograf_prompt": "..."}},
+  {{"baslik": "...", "subtitle": "SENARYO HAVUZU", "aciklama": "...", "caption": "...", "platform": "Instagram", "fotograf_prompt": "..."}},
   ... ({count} adet, gruplandırılmış sırayla)
 ]}}
 """
-    print(f">>> GPT-4 çağrılıyor (hedef {count} post)...", flush=True)
+    print(f">>> GPT-4 çağrılıyor (hedef {count} post, {group_count} grup × 3)...", flush=True)
     resp = client.chat.completions.create(
         model="gpt-4o",
         messages=[
-            {"role": "system", "content": "Sen BSA için editorial bir içerik direktörüsün. Her zaman talep edilen tam sayıda post üretirsin ve geçerli JSON formatında döndürürsün."},
+            {"role": "system", "content": "Sen BSA için editorial bir içerik direktörüsün. Her zaman talep edilen tam sayıda post üretir ve geçerli JSON formatında döndürürsün."},
             {"role": "user", "content": prompt}
         ],
         temperature=0.7,
         response_format={"type": "json_object"},
     )
     raw = resp.choices[0].message.content.strip()
-    print(f">>> GPT-4 yanıt uzunluğu: {len(raw)} ch", flush=True)
-    
+    print(f">>> GPT-4 yanıt: {len(raw)} ch", flush=True)
     parsed = json.loads(raw)
-    
-    # Standart wrapper: {"posts": [...]}
     posts = parsed.get("posts") if isinstance(parsed, dict) else parsed
     if not isinstance(posts, list):
-        # Backup: dict'in herhangi bir array değeri
-        for v in (parsed.values() if isinstance(parsed, dict) else []):
-            if isinstance(v, list) and v:
-                posts = v
-                break
-    
-    if not isinstance(posts, list):
-        raise ValueError(f"Beklenen liste değil, geldi: {type(parsed).__name__} — {str(parsed)[:300]}")
-    
+        raise ValueError(f"Beklenen liste değil: {type(parsed).__name__}")
     print(f">>> {len(posts)} post döndü", flush=True)
-    if len(posts) < count:
-        print(f"!!! UYARI: {count} istendi, {len(posts)} geldi", flush=True)
-    
     return posts[:count]
 
 
 def generate_photo(prompt, idx):
-    import base64
     print(f"  [gpt-image-1 {idx+1}] foto üretiliyor...", flush=True)
     resp = client.images.generate(
         model="gpt-image-1",
@@ -163,114 +149,214 @@ def generate_photo(prompt, idx):
         quality="medium",
         n=1,
     )
-    # gpt-image-1 b64_json döndürür
     b64 = resp.data[0].b64_json
     img_bytes = base64.b64decode(b64)
     print(f"  [gpt-image-1 {idx+1}] tamam ({len(img_bytes)//1024} KB)", flush=True)
     return Image.open(io.BytesIO(img_bytes)).convert("RGB")
 
 
-# ── BSA Template (önceki kod birebir) ──
+# ── V5 Magazine Template ──
 
-def make_logo_overlay(width=280):
+def make_logo_overlay(width=180, color="black"):
+    """Beyaz logodan alpha extract, istenen renkte döndür."""
     logo = Image.open(ASSETS / "BSA_Logo_beyaz_seffaf.png").convert("L")
     lw, lh = logo.size
     target_h = int(lh * width / lw)
     logo_r = logo.resize((width, target_h), Image.LANCZOS)
     arr = np.array(logo_r).astype(np.float32)
-    alpha = np.clip((arr - 80) * 255 / (130 - 80), 0, 255).astype(np.uint8)
+    # Daha agresif alpha — kontrast için
+    alpha = np.clip((arr - 60) * 255 / (130 - 60), 0, 255).astype(np.uint8)
     rgba = np.zeros((target_h, width, 4), dtype=np.uint8)
-    rgba[..., :3] = 255; rgba[..., 3] = alpha
+    if color == "white":
+        rgba[..., :3] = 255
+    else:
+        rgba[..., :3] = 0
+    rgba[..., 3] = alpha
     return Image.fromarray(rgba, "RGBA")
 
 
-def prepare_photo(photo):
-    w, h = photo.size
-    short = min(w, h)
-    left, top = (w - short)//2, (h - short)//2
-    sq = photo.crop((left, top, left + short, top + short))
-    if sq.size != (1080, 1080):
-        sq = sq.resize((1080, 1080), Image.LANCZOS)
-    sq = sq.convert("RGBA")
-    arr = np.array(sq).astype(np.int16)
-    noise = np.random.randint(-7, 7, (1080, 1080, 1)).repeat(3, axis=2)
-    arr[..., :3] = np.clip(arr[..., :3] + noise, 0, 255)
-    return Image.fromarray(arr.astype(np.uint8), "RGBA")
+def prepare_photo_block(photo, w, h):
+    """Fotoğrafı verilen boyutlara cover crop."""
+    pw, ph = photo.size
+    ratio = max(w / pw, h / ph)
+    new_w, new_h = int(pw * ratio), int(ph * ratio)
+    photo = photo.resize((new_w, new_h), Image.LANCZOS)
+    left = (new_w - w) // 2
+    top = (new_h - h) // 2
+    return photo.crop((left, top, left + w, top + h))
 
 
-def choose_layout(title):
-    n = len(title)
-    if n <= 9:   return "single", 200
-    if n <= 12:  return "single", 165
-    if n <= 14:  return "single", 140
-    if n <= 18:  return "two_line", 118
-    return "two_line", 100
+def make_barcode(width=140, height=24):
+    """Dekoratif barkod görseli."""
+    img = Image.new("RGBA", (width, height), (255, 255, 255, 0))
+    draw = ImageDraw.Draw(img)
+    rng = np.random.RandomState(42)
+    x = 0
+    while x < width:
+        bar_w = rng.choice([1, 1, 2, 2, 3])
+        if rng.random() > 0.3:
+            draw.rectangle([x, 0, x + bar_w, height], fill=(0, 0, 0, 255))
+        x += bar_w + rng.choice([1, 1, 2])
+    return img
 
 
 def xml_escape(s):
-    return s.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;").replace("'","&apos;")
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;")
 
 
-def title_svg(title, mode, fs):
-    title = xml_escape(title)
-    main, last = title[:-1], title[-1]
-    if mode == "single":
-        return f'<text x="60" y="920" font-family="Georgia, serif" font-style="italic" font-size="{fs}" fill="#ffffff" letter-spacing="-3">{main}<tspan fill="#8B1A1A">{last}</tspan></text>'
-    parts = title.rsplit(" ", 1)
-    line1, line2 = parts[0], parts[1]
-    return f'<text x="60" y="830" font-family="Georgia, serif" font-style="italic" font-size="{fs}" fill="#ffffff" letter-spacing="-3">{line1}</text>\n<text x="60" y="945" font-family="Georgia, serif" font-style="italic" font-size="{fs}" fill="#ffffff" letter-spacing="-3">{line2[:-1]}<tspan fill="#8B1A1A">{line2[-1]}</tspan></text>'
-
-
-def description_svg(desc):
-    if "\n" in desc:
-        lines = desc.split("\n")[:2]
-    else:
-        words = desc.split()
-        line1, line2 = "", ""
+def wrap_description(desc, max_chars=48):
+    """Açıklamayı satırlara böl."""
+    lines = []
+    for paragraph in desc.split("\n"):
+        words = paragraph.split()
+        cur = ""
         for w in words:
-            if len(line1) + len(w) + 1 <= 52:
-                line1 = (line1 + " " + w).strip()
+            if len(cur) + len(w) + 1 <= max_chars:
+                cur = (cur + " " + w).strip()
             else:
-                line2 = (line2 + " " + w).strip()
-        lines = [line1, line2] if line2 else [line1]
-    out = []
-    for i, l in enumerate(lines):
-        out.append(f'<text x="60" y="{1000+i*28}" font-family="Georgia, serif" font-style="italic" font-size="22" fill="#ffffff" opacity="0.72">{xml_escape(l)}</text>')
-    return "\n".join(out)
+                if cur:
+                    lines.append(cur)
+                cur = w
+        if cur:
+            lines.append(cur)
+    return lines[:3]  # max 3 satır
 
 
-def build_overlay(title, desc):
-    mode, fs = choose_layout(title)
-    return f'''<?xml version="1.0" encoding="UTF-8"?>
+def title_words_layout(title):
+    """
+    Başlık kelime sayısına göre satır düzeni.
+    - 1 kelime → tek satır
+    - 2 kelime → her biri kendi satırında
+    - 3+ kelime → 1+rest veya 2+rest
+    """
+    words = title.upper().split()
+    if len(words) == 1:
+        return [words[0]]
+    elif len(words) == 2:
+        return [words[0], words[1]]
+    else:
+        # 3 kelime: 1+2
+        return [words[0], " ".join(words[1:])]
+
+
+def fit_title_font(lines, max_width=620, base_size=78):
+    """En uzun satıra göre font size ayarla."""
+    longest = max(lines, key=len)
+    char_w = base_size * 0.55  # rough avg char width
+    if len(longest) * char_w > max_width:
+        # küçült
+        new_size = int(max_width / len(longest) / 0.55)
+        return max(48, min(base_size, new_size))
+    return base_size
+
+
+def apply_template(photo, title, subtitle, description, number, output_path, layout="A"):
+    """
+    Magazine style template uygula.
+    layout A: foto sağda 520×680
+    layout B: foto üstte 760×460
+    """
+    canvas = Image.new("RGB", (1080, 1080), (255, 255, 255))
+    
+    title_lines = title_words_layout(title.rstrip(".?!"))
+    title_lines = [xml_escape(l) for l in title_lines]
+    desc_lines = [xml_escape(l) for l in wrap_description(description)]
+    subtitle_esc = xml_escape(subtitle.upper())
+    
+    if layout == "A":
+        # Foto sağda
+        photo_w, photo_h = 520, 700
+        photo_x, photo_y = 510, 200
+        prepared = prepare_photo_block(photo, photo_w, photo_h)
+        canvas.paste(prepared, (photo_x, photo_y))
+        
+        # Title (solda)
+        font_size = fit_title_font(title_lines, max_width=420, base_size=72)
+        title_svg_lines = []
+        y_start = 280
+        for i, l in enumerate(title_lines):
+            y = y_start + i * int(font_size * 1.05)
+            title_svg_lines.append(
+                f'<text x="70" y="{y}" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="{font_size}" fill="#000000" letter-spacing="-2">{l}</text>'
+            )
+        
+        # Subtitle
+        subtitle_y = y_start + len(title_lines) * int(font_size * 1.05) + 30
+        
+        # Description
+        desc_y_start = 640
+        desc_svg_lines = []
+        for i, l in enumerate(desc_lines):
+            desc_svg_lines.append(
+                f'<text x="70" y="{desc_y_start + i*32}" font-family="Georgia, serif" font-style="italic" font-size="22" fill="#444444">{l}</text>'
+            )
+        
+        svg = f'''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
-<defs>
-<linearGradient id="tf" x1="0%" y1="0%" x2="0%" y2="100%">
-<stop offset="0%" stop-color="#0a0908" stop-opacity="0.55"/><stop offset="100%" stop-color="#0a0908" stop-opacity="0"/>
-</linearGradient>
-<linearGradient id="bf" x1="0%" y1="0%" x2="0%" y2="100%">
-<stop offset="0%" stop-color="#0a0908" stop-opacity="0"/><stop offset="38%" stop-color="#0a0908" stop-opacity="0.78"/><stop offset="100%" stop-color="#0a0908" stop-opacity="0.98"/>
-</linearGradient>
-</defs>
-<rect x="0" y="0" width="1080" height="220" fill="url(#tf)"/>
-<rect x="0" y="600" width="1080" height="480" fill="url(#bf)"/>
-{title_svg(title, mode, fs)}
-{description_svg(desc)}
-<line x1="60" y1="1055" x2="1020" y2="1055" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
-<text x="60" y="1078" font-family="Helvetica, sans-serif" font-weight="500" font-size="11" letter-spacing="2.5" fill="#ffffff" opacity="0.65">SENARYOAJANSI.COM</text>
-<text x="1020" y="1078" text-anchor="end" font-family="Georgia, serif" font-style="italic" font-size="12" fill="#ffffff" opacity="0.5">@besiktasenaryoajansi</text>
+{chr(10).join(title_svg_lines)}
+<text x="70" y="{subtitle_y}" font-family="Helvetica, Arial, sans-serif" font-weight="500" font-size="22" fill="#666666" letter-spacing="4">{subtitle_esc}</text>
+{chr(10).join(desc_svg_lines)}
+<text x="430" y="985" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="110" fill="#000000" letter-spacing="-4">{number:02d}</text>
+<line x1="70" y1="985" x2="220" y2="985" stroke="#000000" stroke-width="2"/>
 </svg>'''
-
-
-def apply_template(photo, title, desc, output_path):
-    photo_grain = prepare_photo(photo)
-    svg = build_overlay(title, desc)
+    
+    else:  # Layout B — Foto üstte geniş
+        photo_w, photo_h = 880, 480
+        photo_x, photo_y = 100, 200
+        prepared = prepare_photo_block(photo, photo_w, photo_h)
+        canvas.paste(prepared, (photo_x, photo_y))
+        
+        font_size = fit_title_font(title_lines, max_width=900, base_size=78)
+        title_svg_lines = []
+        y_start = 760
+        for i, l in enumerate(title_lines):
+            y = y_start + i * int(font_size * 1.05)
+            title_svg_lines.append(
+                f'<text x="70" y="{y}" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="{font_size}" fill="#000000" letter-spacing="-2">{l}</text>'
+            )
+        
+        subtitle_y = y_start + len(title_lines) * int(font_size * 1.05) + 15
+        
+        desc_y_start = subtitle_y + 60
+        desc_svg_lines = []
+        for i, l in enumerate(desc_lines[:2]):  # max 2 line in B
+            desc_svg_lines.append(
+                f'<text x="70" y="{desc_y_start + i*30}" font-family="Georgia, serif" font-style="italic" font-size="20" fill="#444444">{l}</text>'
+            )
+        
+        svg = f'''<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+{chr(10).join(title_svg_lines)}
+<text x="70" y="{subtitle_y}" font-family="Helvetica, Arial, sans-serif" font-weight="500" font-size="20" fill="#666666" letter-spacing="4">{subtitle_esc}</text>
+{chr(10).join(desc_svg_lines)}
+<text x="1010" y="1000" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="110" fill="#000000" letter-spacing="-4">{number:02d}</text>
+</svg>'''
+    
+    # SVG → overlay
     buf = io.BytesIO()
     cairosvg.svg2png(bytestring=svg.encode("utf-8"), write_to=buf, output_width=1080, output_height=1080)
     buf.seek(0)
     overlay = Image.open(buf).convert("RGBA")
-    result = Image.alpha_composite(photo_grain, overlay)
-    logo = make_logo_overlay(280)
-    result.paste(logo, (60, 55), logo)
+    canvas_rgba = canvas.convert("RGBA")
+    result = Image.alpha_composite(canvas_rgba, overlay)
+    
+    # Logo sol üst (siyah, 180px)
+    logo = make_logo_overlay(180, "black")
+    result.paste(logo, (70, 70), logo)
+    
+    # Web URL sağ üst — PIL ile çiz (siyah, küçük caps)
+    draw = ImageDraw.Draw(result)
+    try:
+        font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+        font = ImageFont.truetype(font_path, 18)
+        draw.text((1010, 100), "WWW.SENARYOAJANSI.COM", fill=(0, 0, 0, 255), font=font, anchor="rm")
+    except Exception:
+        pass
+    
+    # Barkod sol alt
+    barcode = make_barcode(140, 24)
+    result.paste(barcode, (70, 990), barcode)
+    
     result.convert("RGB").save(output_path, quality=95)
 
 
@@ -287,13 +373,10 @@ def push_to_make(record):
 
 
 # ── Main ──
-
 def main():
     print("=" * 60, flush=True)
-    print(f"BSA AYLIK POST ÜRETİMİ — {MONTH_LABEL}", flush=True)
+    print(f"BSA AYLIK POST ÜRETİMİ v5 — {MONTH_LABEL}", flush=True)
     print(f"Hedef: {POST_COUNT} post, {TR_MONTHS[TARGET_MONTH]} {TARGET_YEAR}", flush=True)
-    print(f"OPENAI_API_KEY: {'var' if OPENAI_KEY else 'YOK'} ({len(OPENAI_KEY)} ch)", flush=True)
-    print(f"MAKE_WEBHOOK: {MAKE_WEBHOOK[:60]}", flush=True)
     print("=" * 60, flush=True)
     
     dates = calculate_post_dates(TARGET_YEAR, TARGET_MONTH, POST_COUNT)
@@ -301,30 +384,29 @@ def main():
     
     posts = generate_content(POST_COUNT)
     
-    if not posts:
-        print("HATA: GPT-4'ten hiç post gelmedi", flush=True)
-        sys.exit(1)
-    
-    print(f"\n>>> {len(posts)} post ile {len(dates)} tarih için döngü başlıyor\n", flush=True)
+    print(f"\n>>> {len(posts)} post ile {len(dates)} tarih için döngü\n", flush=True)
     
     success = 0
     for i, (post_date, post_data) in enumerate(zip(dates, posts)):
         try:
             baslik = post_data["baslik"]
+            subtitle = post_data.get("subtitle", "")
             aciklama = post_data["aciklama"]
             caption = post_data["caption"]
             platform = post_data.get("platform", "Instagram")
-            photo_prompt = post_data.get("fotograf_prompt") or post_data.get("fotoğraf_prompt", "Black and white cinematic still life")
+            photo_prompt = post_data.get("fotograf_prompt") or post_data.get("fotoğraf_prompt", "Wide shot color photograph of a screenwriter at desk")
             
             fname = f"{post_date.strftime('%d')}-{TR_MONTHS[TARGET_MONTH]}-{TR_DAYS[post_date.weekday()]}-{slugify(baslik)}.png"
             out_path = POSTS_DIR / fname
             
-            print(f"─── Post {i+1}/{len(posts)} — {post_date.strftime('%d %b')} ─── {baslik}", flush=True)
+            print(f"─── Post {i+1}/{len(posts)} — {post_date.strftime('%d %b')} ─── {baslik} [{subtitle}]", flush=True)
             
             photo = generate_photo(photo_prompt, i)
-            print(f"  [Template] uygulanıyor...", flush=True)
-            apply_template(photo, baslik, aciklama, out_path)
-            print(f"  [Template] kaydedildi: {fname}", flush=True)
+            
+            # Layout rotation: A, B alternate
+            layout = "A" if i % 2 == 0 else "B"
+            print(f"  [Template] layout={layout}, numara={i+1}", flush=True)
+            apply_template(photo, baslik, subtitle, aciklama, i + 1, out_path, layout=layout)
             
             push_to_make({
                 "tarih": post_date.strftime("%Y-%m-%d"),
@@ -342,9 +424,7 @@ def main():
             traceback.print_exc()
             continue
     
-    print(f"\n{'='*60}", flush=True)
-    print(f"✓ TAMAMLANDI — {success}/{len(dates)} post üretildi", flush=True)
-    print(f"{'='*60}", flush=True)
+    print(f"\n{'='*60}\n✓ TAMAMLANDI — {success}/{len(dates)} post\n{'='*60}", flush=True)
 
 
 if __name__ == "__main__":
