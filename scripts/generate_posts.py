@@ -64,44 +64,59 @@ URL: www.senaryoajansi.com. Instagram: @besiktasenaryoajansi."""
 
 def generate_content(count):
     """N adet post üret. Her zaman tam N adet array döndürür."""
+    # Hizmet grupları sayısı (her grup 3 post)
+    group_count = max(1, count // 3)
+    
     prompt = f"""{BRAND_BRIEF}
 
-Tam olarak {count} adet sosyal medya postu hazırla. ZORUNLU: {count} adet, ne eksik ne fazla.
+Tam olarak {count} adet sosyal medya postu hazırla. ZORUNLU: {count} adet.
 
-İÇERİK DAĞILIMI:
-- %40 → **Senaryo Havuzu** odaklı (yapımcı-senarist buluşturma, 8 platform)
-- %20 → Diğer hizmetler (Tescil, Doktorluk, Proje Dosyası — sırayla)
-- %20 → Senarist yolculuğu / motivasyon (samimi, "yanındayız" tonu)
-- %10 → Yapımcı tarafı (LinkedIn'e uygun, içerik arayışı)
-- %10 → Atölye / yarışma / kültür
+YAPI — ÖNEMLİ:
+- Postlar {group_count} GRUBA bölünür, her grupta 3 post aynı hizmeti farklı açıdan anlatır.
+- Her grup için bir hizmet seç:
+   • **Senaryo Havuzu** — yapımcı-senarist buluşturma platformu, 8 büyük platforma (Netflix, Amazon, Disney+, HBO Max, Tabii, Gain, TOD, Exxen) proje gönderimi
+   • **Senaryo Tescili** — fikri koruma, mesleki sorumluluk sigortası
+   • **Senaryo Doktorluğu** — yapısal analiz, karakter çalışması, profesyonel rapor
+   • **Film Proje Dosyası** — yapımcıya sunulacak pitch deck hazırlığı
+   • **Atölyeler** — yazma eğitimleri (Temel Senaryo, Karakter, Dizi Pilotu)
+
+- {group_count} grup için {group_count} farklı hizmet seç. Tercihen Senaryo Havuzu mutlaka olsun (ana hizmet).
+- Her gruptaki 3 post farklı açıdan SAME service için: 
+   (1) sorun/dert ile başlayan empati postu
+   (2) hizmetin bir yönünü tanıtan post
+   (3) call-to-action / davet postu
 
 Her postta 5 alan:
 
-1. **baslik** — Kısa (1-3 kelime), samimi, davetkâr. Bir kapıyı açar gibi.
-   ÖRNEK İYİ: "Buluşma noktası.", "Yalnız değilsin.", "Bekleyen hikâyen var.", "Bir araya gelelim.", "Senin sıran."
-   YANLIŞ: "Tescil.", "Doktorluk." (çok mesafeli, çok eski editorial)
+1. **baslik** — Kısa (1-3 kelime), samimi, davetkâr.
+   ÖRNEK İYİ: "Buluşma noktası.", "Yalnız değilsin.", "Bekleyen hikâyen var.", "Senin sıran.", "Bir araya gelelim."
+   YANLIŞ: "Tescil.", "Doktorluk." (çok kuru)
 
-2. **aciklama** — 1-2 cümle, samimi italik. Senaristin/yapımcının kalbine konuşur.
-   ÖRNEK İYİ: "Senaryon hazır, ama onu kime gösterirsin? Doğru kapıyı birlikte bulalım."
-   YANLIŞ: "Profesyonel hizmet, hızlı süreç." (klişe)
+2. **aciklama** — 1-2 cümle samimi italik. "Sizi anlıyoruz" tonu.
 
-3. **caption** — Instagram caption, 80-150 kelime. Samimi, içten. "Sizi anlıyoruz" tonu. 3-5 hashtag.
+3. **caption** — Instagram caption 80-150 kelime. İçten, satıcı değil. 3-5 hashtag.
 
-4. **platform** — "Instagram" veya "LinkedIn" (LinkedIn ~%20-30, yapımcı odaklı içerik için)
+4. **platform** — "Instagram" (varsayılan). LinkedIn sadece yapımcı odaklı bazı postlar için.
 
-5. **fotograf_prompt** — gpt-image-1 İngilizce prompt. ZORUNLU kurallara uy:
-   - **PHOTOREALISTIC** documentary-style photography (NOT illustration, NOT abstract)
-   - **Bir İNSAN olmalı** — çeşitlilik: kadın senarist, erkek yapımcı, iki kişi bir masada konuşuyor
-   - Black and white VEYA warm sepia
-   - 35mm film grain, natural soft window light, intimate atmosphere
-   - Konu seçenekleri: woman writing screenplay at desk with laptop, two people discussing a script over coffee, hands typing on vintage typewriter, person reading manuscript pages, screenwriter at cafe with notebook, producer and writer meeting in office
-   - Yazı/metin görülebilir (manuscript pages, laptop screen)
-   - ÖRNEK İYİ: "Documentary-style photograph in warm sepia tones, a woman in her 30s writing at a wooden desk with a vintage typewriter, soft window light from left side, manuscript pages and coffee cup scattered on desk, focused thoughtful expression, 35mm grain, intimate quiet atmosphere, photorealistic"
+5. **fotograf_prompt** — gpt-image-1 İngilizce. ZORUNLU kurallar:
+   - **COLOR photograph** (RENKLİ, siyah-beyaz değil)
+   - **PHOTOREALISTIC**, magazine editorial style (Vogue, Cosmopolitan tarzı)
+   - Kişi/kişiler **MEDIUM SHOT veya WIDE SHOT** (NOT close-up, NOT face close-up) — gövdeden ya da uzaktan
+   - Kişi tipi: **Turkish, Southern European or Mediterranean appearance** (olive skin, dark hair common). Çeşitlilik için: kadın/erkek, genç/orta yaş.
+   - Doğal yumuşak ışık, warm tones, contemporary urban setting (Istanbul cafe, modern apartment, co-working space, sunlit office)
+   - Konu seçenekleri (HEPSİ medium/wide shot):
+     • Kadın senarist Istanbul cafe'sinde laptop'la yazıyor, dışarıdan çekim
+     • İki kişi modern bir ofiste senaryo üzerinde konuşuyor, masaya wide shot
+     • Erkek yapımcı pencere kenarında manuscript okuyor, wide angle
+     • Senarist evde kitaplıkla birlikte yazı masasında, oda görünür
+     • Iki yapımcı bir kafede toplanmış, ortam ile birlikte görünür
+   - YAZI/METIN ekrandan veya kâğıttan biraz görülebilir ama odak insan ve atmosfer
+   - ÖRNEK İYİ: "Color photograph, magazine editorial style, wide shot of a Turkish woman in her early 30s sitting at a sunlit cafe table in Istanbul, writing in a notebook with a laptop nearby, warm natural light, contemporary urban atmosphere, olive skin and dark hair, soft focus background of bookshelves and plants, photorealistic, Vogue editorial aesthetic"
 
 ÇIKTI FORMATI — GEÇERLI JSON OBJECT:
 {{"posts": [
   {{"baslik": "...", "aciklama": "...", "caption": "...", "platform": "Instagram", "fotograf_prompt": "..."}},
-  ... ({count} adet)
+  ... ({count} adet, gruplandırılmış sırayla)
 ]}}
 """
     print(f">>> GPT-4 çağrılıyor (hedef {count} post)...", flush=True)
@@ -157,7 +172,7 @@ def generate_photo(prompt, idx):
 
 # ── BSA Template (önceki kod birebir) ──
 
-def make_logo_overlay(width=140):
+def make_logo_overlay(width=280):
     logo = Image.open(ASSETS / "BSA_Logo_beyaz_seffaf.png").convert("L")
     lw, lh = logo.size
     target_h = int(lh * width / lw)
@@ -254,7 +269,7 @@ def apply_template(photo, title, desc, output_path):
     buf.seek(0)
     overlay = Image.open(buf).convert("RGBA")
     result = Image.alpha_composite(photo_grain, overlay)
-    logo = make_logo_overlay(140)
+    logo = make_logo_overlay(280)
     result.paste(logo, (60, 55), logo)
     result.convert("RGB").save(output_path, quality=95)
 
