@@ -6,21 +6,25 @@ MAKE_WEBHOOK: https://hook.eu2.make.com/bpfs7gs3o3cic9v2rutbu2b26272tq68
 ============================================================
 Tarihler: ['02.07', '04.07', '07.07']
 >>> GPT-4 çağrılıyor (hedef 3 post)...
+>>> GPT-4 yanıt uzunluğu: 1755 ch
+>>> 3 post döndü
 
-FATAL: BadRequestError: Error code: 400 - {'error': {'message': "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.", 'type': 'invalid_request_error', 'param': 'messages', 'code': None}}
+>>> 3 post ile 3 tarih için döngü başlıyor
+
+─── Post 1/3 — 02 Jul ─── Sekiz Kapı.
+  [DALL-E 1] foto üretiliyor...
+  ✗ HATA: BadRequestError: Error code: 400 - {'error': {'message': "Unknown parameter: 'style'.", 'type': 'invalid_request_error', 'param': 'style', 'code': 'unknown_parameter'}}
 Traceback (most recent call last):
-  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 311, in <module>
-    main()
-  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 261, in main
-    posts = generate_content(POST_COUNT)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 87, in generate_content
-    resp = client.chat.completions.create(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 283, in main
+    photo = generate_photo(photo_prompt, i)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 122, in generate_photo
+    resp = client.images.generate(
+           ^^^^^^^^^^^^^^^^^^^^^^^
   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_utils/_utils.py", line 298, in wrapper
     return func(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/resources/chat/completions/completions.py", line 1215, in create
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/resources/images.py", line 997, in generate
     return self._post(
            ^^^^^^^^^^^
   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1332, in post
@@ -28,4 +32,52 @@ Traceback (most recent call last):
                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1105, in request
     raise self._make_status_error_from_response(err.response) from None
-openai.BadRequestError: Error code: 400 - {'error': {'message': "'messages' must contain the word 'json' in some form, to use 'response_format' of type 'json_object'.", 'type': 'invalid_request_error', 'param': 'messages', 'code': None}}
+openai.BadRequestError: Error code: 400 - {'error': {'message': "Unknown parameter: 'style'.", 'type': 'invalid_request_error', 'param': 'style', 'code': 'unknown_parameter'}}
+─── Post 2/3 — 04 Jul ─── Yapımcılar İçin.
+  [DALL-E 2] foto üretiliyor...
+  ✗ HATA: BadRequestError: Error code: 400 - {'error': {'message': "Unknown parameter: 'style'.", 'type': 'invalid_request_error', 'param': 'style', 'code': 'unknown_parameter'}}
+Traceback (most recent call last):
+  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 283, in main
+    photo = generate_photo(photo_prompt, i)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 122, in generate_photo
+    resp = client.images.generate(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_utils/_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/resources/images.py", line 997, in generate
+    return self._post(
+           ^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.BadRequestError: Error code: 400 - {'error': {'message': "Unknown parameter: 'style'.", 'type': 'invalid_request_error', 'param': 'style', 'code': 'unknown_parameter'}}
+─── Post 3/3 — 07 Jul ─── Yarı Yıl.
+  [DALL-E 3] foto üretiliyor...
+  ✗ HATA: BadRequestError: Error code: 400 - {'error': {'message': "Unknown parameter: 'style'.", 'type': 'invalid_request_error', 'param': 'style', 'code': 'unknown_parameter'}}
+Traceback (most recent call last):
+  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 283, in main
+    photo = generate_photo(photo_prompt, i)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/bsa-social-media/bsa-social-media/scripts/generate_posts.py", line 122, in generate_photo
+    resp = client.images.generate(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_utils/_utils.py", line 298, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/resources/images.py", line 997, in generate
+    return self._post(
+           ^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/openai/_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.BadRequestError: Error code: 400 - {'error': {'message': "Unknown parameter: 'style'.", 'type': 'invalid_request_error', 'param': 'style', 'code': 'unknown_parameter'}}
+
+============================================================
+✓ TAMAMLANDI — 0/3 post üretildi
+============================================================
