@@ -122,7 +122,22 @@ Her postta 6 alan:
 
 4. **aciklama** — 1-2 cümle samimi italik açıklama. "Sizi anlıyoruz" tonu. Max 80 karakter — kısa olsun, tasarımda yerleşecek.
 
-5. **caption** — Instagram caption 80-150 kelime. İçten, satıcı değil. Mutlaka resmi linki ekle. 3-5 hashtag.
+5. **caption** — Instagram caption 80-150 kelime. İçten, satıcı değil. 3-5 hashtag.
+   ZORUNLU: caption'ın sonunda mutlaka HEM website HEM email olmalı:
+   📞 İletişim:
+   www.senaryoajansi.com (ya da ilgili alt sayfası)
+   bilgi@senaryoajansi.com
+   
+   ÖRNEK YAPI:
+   "[1-2 cümle empati/giriş]
+   
+   [hizmet anlatımı]
+   
+   📞 İletişim:
+   🌐 www.senaryoajansi.com/senaryohavuzu
+   📩 bilgi@senaryoajansi.com
+   
+   #SenaryoHavuzu #BSA #Senarist"
 
 6. **platform** — "Instagram" varsayılan. LinkedIn ~%20 yapımcı odaklı içerik için.
 
