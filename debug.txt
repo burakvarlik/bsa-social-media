@@ -1,65 +1,65 @@
 ============================================================
-BSA AYLIK POST ÜRETİMİ v5 — Temmuz 2026 v6.1
+BSA AYLIK POST ÜRETİMİ v5 — Temmuz 2026 v7
 Hedef: 9 post, tem 2026
 ============================================================
 Tarihler: ['02.07', '04.07', '07.07', '09.07', '11.07', '14.07', '16.07', '18.07', '21.07']
 >>> GPT-4 çağrılıyor (hedef 9 post, 3 grup × 3)...
->>> GPT-4 yanıt: 5825 ch
+>>> GPT-4 yanıt: 6689 ch
 >>> 9 post döndü
 
 >>> 9 post ile 9 tarih için döngü
 
 ─── Post 1/9 — 02 Jul ─── Yalnız değilsin. [SENARYO HAVUZU]
   [gpt-image-1 1] foto üretiliyor...
-  [gpt-image-1 1] tamam (1451 KB)
+  [gpt-image-1 1] tamam (1358 KB)
   [Template] layout=A, numara=1
   [Make] webhook'a gönderiliyor: 2026-07-02
   [Make] yanıt: 200 {"ok":true,"key":"2026-07-02"}
-─── Post 2/9 — 04 Jul ─── Fırsatlar burada. [SENARYO HAVUZU]
+─── Post 2/9 — 04 Jul ─── Hikâyen Hazır. [SENARYO HAVUZU]
   [gpt-image-1 2] foto üretiliyor...
-  [gpt-image-1 2] tamam (1437 KB)
+  [gpt-image-1 2] tamam (1434 KB)
   [Template] layout=M, numara=2
   [Make] webhook'a gönderiliyor: 2026-07-04
   [Make] yanıt: 200 {"ok":true,"key":"2026-07-04"}
-─── Post 3/9 — 07 Jul ─── Senin sıran. [SENARYO HAVUZU]
+─── Post 3/9 — 07 Jul ─── Senin Sıran. [SENARYO HAVUZU]
   [gpt-image-1 3] foto üretiliyor...
-  [gpt-image-1 3] tamam (1314 KB)
+  [gpt-image-1 3] tamam (1410 KB)
   [Template] layout=B, numara=3
   [Make] webhook'a gönderiliyor: 2026-07-07
   [Make] yanıt: 200 {"ok":true,"key":"2026-07-07"}
-─── Post 4/9 — 09 Jul ─── Güvende olun. [SENARYO TESCİLİ]
+─── Post 4/9 — 09 Jul ─── Koruma Altında. [SENARYO TESCİLİ]
   [gpt-image-1 4] foto üretiliyor...
-  [gpt-image-1 4] tamam (1424 KB)
+  [gpt-image-1 4] tamam (1272 KB)
   [Template] layout=A, numara=4
   [Make] webhook'a gönderiliyor: 2026-07-09
   [Make] yanıt: 200 {"ok":true,"key":"2026-07-09"}
-─── Post 5/9 — 11 Jul ─── Koruma burada. [SENARYO TESCİLİ]
+─── Post 5/9 — 11 Jul ─── Güvenli Eller. [SENARYO TESCİLİ]
   [gpt-image-1 5] foto üretiliyor...
-  [gpt-image-1 5] tamam (1542 KB)
+  [gpt-image-1 5] tamam (1364 KB)
   [Template] layout=M, numara=5
   [Make] webhook'a gönderiliyor: 2026-07-11
   [Make] yanıt: 200 {"ok":true,"key":"2026-07-11"}
-─── Post 6/9 — 14 Jul ─── Haklarınızı koruyun. [SENARYO TESCİLİ]
+─── Post 6/9 — 14 Jul ─── Adım At. [SENARYO TESCİLİ]
   [gpt-image-1 6] foto üretiliyor...
-  [gpt-image-1 6] tamam (1416 KB)
+  [gpt-image-1 6] tamam (1351 KB)
   [Template] layout=B, numara=6
   [Make] webhook'a gönderiliyor: 2026-07-14
   [Make] yanıt: 200 {"ok":true,"key":"2026-07-14"}
-─── Post 7/9 — 16 Jul ─── Yardım burada. [SENARYO DOKTORLUĞU]
+─── Post 7/9 — 16 Jul ─── Görünür Olun. [SENARYO DOKTORLUĞU]
   [gpt-image-1 7] foto üretiliyor...
-  [gpt-image-1 7] tamam (1360 KB)
+  [gpt-image-1 7] tamam (1418 KB)
   [Template] layout=A, numara=7
   [Make] webhook'a gönderiliyor: 2026-07-16
   [Make] yanıt: 200 {"ok":true,"key":"2026-07-16"}
-─── Post 8/9 — 18 Jul ─── Destek alın. [SENARYO DOKTORLUĞU]
+─── Post 8/9 — 18 Jul ─── Doğru An. [SENARYO DOKTORLUĞU]
   [gpt-image-1 8] foto üretiliyor...
-  [gpt-image-1 8] tamam (1371 KB)
+  [gpt-image-1 8] tamam (1343 KB)
   [Template] layout=M, numara=8
   [Make] webhook'a gönderiliyor: 2026-07-18
   [Make] yanıt: 200 {"ok":true,"key":"2026-07-18"}
-─── Post 9/9 — 21 Jul ─── Geliştirme zamanı. [SENARYO DOKTORLUĞU]
+─── Post 9/9 — 21 Jul ─── Hayata Geçir. [SENARYO DOKTORLUĞU]
   [gpt-image-1 9] foto üretiliyor...
-  [gpt-image-1 9] tamam (1402 KB)
+  [gpt-image-1 9] tamam (1417 KB)
   [Template] layout=B, numara=9
   [Make] webhook'a gönderiliyor: 2026-07-21
   [Make] yanıt: 200 {"ok":true,"key":"2026-07-21"}
