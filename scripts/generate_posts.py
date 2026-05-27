@@ -101,21 +101,32 @@ YAPI — ÇOK ÖNEMLİ:
 
 Her postta 6 alan:
 
-1. **baslik** — Kısa (1-3 kelime), samimi, davetkâr. Sonunda nokta veya soru işareti.
-   ÖRNEK: "Yalnız değilsin.", "Buluşma noktası.", "Bekleyen hikâyen var.", "Senin sıran.", "Bir araya gelelim."
+1. **baslik** — Kısa (1-3 kelime), samimi VEYA DAVETKÂR ya da güçlü çağrı. Sonunda nokta veya soru işareti.
+   ÖRNEK GÜÇLÜ: "Görünür Olun.", "Yetenek Kapısı.", "Senin Sıran.", "Hayata Geçir.", "İz Bırak.", "Doğru An.", "Hikâyen Hazır.", "Adım At.", "Şimdi Vakit."
+   ÖRNEK SAMİMİ: "Yalnız değilsin.", "Buluşma noktası.", "Bekleyen hikâyen var.", "Bir araya gelelim."
+   3 postluk grupta dengeli karış: empati (samimi) + tanıtım (nötr) + davet (güçlü/çağrı).
    ÇOK UZUN OLMASIN — başlık tasarımda CAPS sans-serif gösteriliyor, max 18 karakter olsun.
 
 2. **subtitle** — Hizmet adı (CAPS gösterilir). DEĞER ÖRNEKLERİ:
    "SENARYO HAVUZU", "SENARYO TESCİLİ", "SENARYO DOKTORLUĞU", "FİLM PROJE DOSYASI", "ATÖLYELER"
    Postun ait olduğu hizmet adını bire bir yaz.
 
-3. **aciklama** — 1-2 cümle samimi italik açıklama. "Sizi anlıyoruz" tonu. Max 80 karakter — kısa olsun, tasarımda yerleşecek.
+3. **subtitle_description** — Subtitle'ın hemen altında çıkacak KISA açıklayıcı yazı (1 satır, 4-7 kelime). 
+   Hizmet için iki temel özelliği veya değer önerisini gösterir. Sonuna nokta KOYMA.
+   ÖRNEKLER (hizmet adına göre):
+   - SENARYO HAVUZU → "8 platform · yapımcı buluşturma"
+   - SENARYO TESCİLİ → "Yasal koruma · mesleki sigorta"
+   - SENARYO DOKTORLUĞU → "Profesyonel rapor · yapısal analiz"
+   - FİLM PROJE DOSYASI → "4 adımda pitch deck"
+   - ATÖLYELER → "Temel senaryo · karakter · dizi pilotu"
 
-4. **caption** — Instagram caption 80-150 kelime. İçten, satıcı değil. Mutlaka resmi linki ekle. 3-5 hashtag.
+4. **aciklama** — 1-2 cümle samimi italik açıklama. "Sizi anlıyoruz" tonu. Max 80 karakter — kısa olsun, tasarımda yerleşecek.
 
-5. **platform** — "Instagram" varsayılan. LinkedIn ~%20 yapımcı odaklı içerik için.
+5. **caption** — Instagram caption 80-150 kelime. İçten, satıcı değil. Mutlaka resmi linki ekle. 3-5 hashtag.
 
-6. **fotograf_prompt** — gpt-image-1 İngilizce prompt. ZORUNLU kurallar:
+6. **platform** — "Instagram" varsayılan. LinkedIn ~%20 yapımcı odaklı içerik için.
+
+7. **fotograf_prompt** — gpt-image-1 İngilizce prompt. ZORUNLU kurallar:
    - **WIDE SHOT** — kişiyi UZAKTAN gör. Mekan/ortam tam görünür. NOT close-up, NOT face shot, NOT portrait.
    - Kişi: tam gövde veya gövde+orta, oturan/yazan/okuyan, screenwriting/cinema bağlamı
    - Bağlam: kişi laptop'ta yazıyor, kitaplı ofiste senaryo okuyor, sinema setinde gözlem yapıyor, masada projeyi inceliyor
@@ -128,7 +139,7 @@ Her postta 6 alan:
 
 ÇIKTI FORMATI — GEÇERLI JSON OBJECT:
 {{"posts": [
-  {{"baslik": "...", "subtitle": "SENARYO HAVUZU", "aciklama": "...", "caption": "...", "platform": "Instagram", "fotograf_prompt": "..."}},
+  {{"baslik": "...", "subtitle": "SENARYO HAVUZU", "subtitle_description": "8 platform · yapımcı buluşturma", "aciklama": "...", "caption": "...", "platform": "Instagram", "fotograf_prompt": "..."}},
   ... ({count} adet, gruplandırılmış sırayla)
 ]}}
 """
@@ -276,7 +287,7 @@ def clean_markdown(s):
     return s.strip()
 
 
-def apply_template(photo, title, subtitle, description, number, output_path, layout="A"):
+def apply_template(photo, title, subtitle, subtitle_desc, description, number, output_path, layout="A"):
     """
     Magazine style template uygula.
     layout A: foto sağda 520×700, BEYAZ BG, insan
@@ -303,6 +314,7 @@ def apply_template(photo, title, subtitle, description, number, output_path, lay
     title_lines = [xml_escape(l) for l in title_lines]
     desc_lines = [xml_escape(l) for l in wrap_description(description)]
     subtitle_esc = xml_escape(subtitle.upper())
+    subtitle_desc_esc = xml_escape(clean_markdown(subtitle_desc) if subtitle_desc else "")
     
     if layout == "A":
         # Foto sağda
@@ -338,8 +350,8 @@ def apply_template(photo, title, subtitle, description, number, output_path, lay
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
 {title_block}
 <text x="70" y="{subtitle_y}" font-family="Helvetica, Arial, sans-serif" font-weight="500" font-size="22" fill="{subtitle_color}" letter-spacing="4">{subtitle_esc}</text>
+<text x="70" y="{subtitle_y + 32}" font-family="Georgia, serif" font-style="italic" font-size="18" fill="{desc_color}">{subtitle_desc_esc}</text>
 {desc_block}
-<text x="430" y="985" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="110" fill="{text_color}" letter-spacing="-4">{number:02d}</text>
 <line x1="70" y1="985" x2="220" y2="985" stroke="{text_color}" stroke-width="2"/>
 </svg>'''
     
@@ -373,8 +385,9 @@ def apply_template(photo, title, subtitle, description, number, output_path, lay
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
 {title_block}
 <text x="70" y="{subtitle_y}" font-family="Helvetica, Arial, sans-serif" font-weight="500" font-size="20" fill="{subtitle_color}" letter-spacing="4">{subtitle_esc}</text>
+<text x="70" y="{subtitle_y + 30}" font-family="Georgia, serif" font-style="italic" font-size="18" fill="{desc_color}">{subtitle_desc_esc}</text>
 {desc_block}
-<text x="1010" y="1000" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="110" fill="{text_color}" letter-spacing="-4">{number:02d}</text>
+
 </svg>'''
     
     # SVG → overlay
@@ -394,7 +407,7 @@ def apply_template(photo, title, subtitle, description, number, output_path, lay
     try:
         font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
         font = ImageFont.truetype(font_path, 18)
-        draw.text((1010, 100), "WWW.SENARYOAJANSI.COM", fill=url_color, font=font, anchor="rm")
+        draw.text((1010, 100), "www.senaryoajansi.com", fill=url_color, font=font, anchor="rm")
     except Exception:
         pass
     
@@ -437,6 +450,7 @@ def main():
         try:
             baslik = post_data["baslik"]
             subtitle = post_data.get("subtitle", "")
+            subtitle_desc = post_data.get("subtitle_description", "")
             aciklama = post_data["aciklama"]
             caption = post_data["caption"]
             platform = post_data.get("platform", "Instagram")
@@ -479,7 +493,7 @@ def main():
             else:
                 layout = "B"
             print(f"  [Template] layout={layout}, numara={i+1}", flush=True)
-            apply_template(photo, baslik, subtitle, aciklama, i + 1, out_path, layout=layout)
+            apply_template(photo, baslik, subtitle, subtitle_desc, aciklama, i + 1, out_path, layout=layout)
             
             push_to_make({
                 "tarih": post_date.strftime("%Y-%m-%d"),
